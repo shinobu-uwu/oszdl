@@ -72,14 +72,13 @@ async fn send_request(client: &Client, query: &str, config: &Config) -> Result<R
     let response = client.get(SEARCH_URL)
         .query(&[("q", query)])
         .query(&config.filters)
-        .header("Cookie", config.cookie.trim());
-    dbg!(&response);
-    let a = response.send()
+        .header("Cookie", config.cookie.trim())
+        .send()
         .await?
         .json::<Response>()
         .await?;
 
-    Ok(a)
+    Ok(response)
 }
 
 fn display_maps(beatmapsets: &Vec<Beatmap>) {
