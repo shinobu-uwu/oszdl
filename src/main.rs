@@ -21,9 +21,9 @@ mod response;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{
-    let config = load_config()?;
+    let mut config = load_config()?;
     let client = Client::new();
-    let query = Cli::from_args().query;
+    let query = parse_args(&mut config);
     let response = send_request(&client, query.as_str(), &config).await?;
 
     display_maps(&response.beatmapsets);
@@ -51,17 +51,35 @@ fn load_config() -> Result<Config, Box<dyn Error>> {
     Ok(config)
 }
 
+fn parse_args(config: &mut Config) -> String {
+    let cli = Cli::from_args();
+    match cli.mode {
+        Some(mode) => {
+            let mode = mode as u8;
+            config.filters.insert("m".to_string(), mode.to_string());
+        },
+        None => {}
+    }
+
+    if cli.recommended_difficulty {
+        config.filters.insert("c".to_string(), "recommended".to_string());
+    }
+
+    cli.query
+}
+
 async fn send_request(client: &Client, query: &str, config: &Config) -> Result<Response, reqwest::Error> {
     let response = client.get(SEARCH_URL)
         .query(&[("q", query)])
         .query(&config.filters)
-        .header("Cookie", config.cookie.trim())
-        .send()
+        .header("Cookie", config.cookie.trim());
+    dbg!(&response);
+    let a = response.send()
         .await?
         .json::<Response>()
         .await?;
 
-    Ok(response)
+    Ok(a)
 }
 
 fn display_maps(beatmapsets: &Vec<Beatmap>) {
