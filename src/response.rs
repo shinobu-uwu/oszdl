@@ -20,7 +20,7 @@ impl Beatmap {
     // This is needed for those running osu under wine, wine doesn't recognize some characters and
     // will throw a IllegalCharacterInPath exception.
     pub fn sanitized_name(&self) -> String {
-        let formatted_name = format!("{} - {} ({})", self.artist, self.title, self.creator);
+        let formatted_name = format!("{}", self);
         let mut sanitized_name = formatted_name.clone();
 
         for c in formatted_name.chars() {
