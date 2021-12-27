@@ -88,7 +88,7 @@ fn display_maps(beatmapsets: &Vec<Beatmap>) {
 }
 
 fn get_maps_to_download(beatmapsets: Vec<Beatmap>) -> Result<Vec<Beatmap>, std::io::Error> {
-    println!("Select the maps you wish to downloade (e.g 1 3-5 11)");
+    println!("Select the maps you wish to download (e.g 1 3-5 11)");
     let mut selection = String::new(); 
     stdin().read_line(&mut selection)?;
     let selection = selection.trim();
