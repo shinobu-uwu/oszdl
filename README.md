@@ -1,4 +1,4 @@
-# osz-dl
+# oszdl
 A simple CLI beatmapset downloader for [osu!](https://osu.ppy.sh/)
 ## Config
 The first time you run the script it will ask for your osu! session cookie, directory to save the maps downloaded and will create a yaml config file in `~/.config/oszdl`
