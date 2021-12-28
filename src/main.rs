@@ -8,6 +8,7 @@ use std::cmp::min;
 use std::error::Error;
 use std::fs::File;
 use std::io::{stdin, Write};
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 const APP_NAME: &str = "oszdl";
@@ -22,6 +23,7 @@ mod response;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let mut config = load_config()?;
+    dbg!(&config.download_directory);
     let client = Client::new();
     let query = parse_args(&mut config);
     let response = send_request(&client, query.as_str(), &config).await?;
@@ -37,13 +39,17 @@ fn load_config() -> Result<Config, Box<dyn Error>> {
     let mut config: Config = confy::load(APP_NAME, CONFIG_NAME)?;
 
     if config.download_directory.is_empty() {
+        let mut download_directory = String::new();
         println!("Enter the path where you wish to save the downloaded beatmaps");
-        stdin().read_line(&mut config.download_directory)?;
+        stdin().read_line(&mut download_directory)?;
+        config.download_directory = download_directory.trim().to_string();
     }
 
     if config.cookie.is_empty() {
+        let mut cookie = String::new();
         println!("Enter your osu! session cookie (check README for more informations)");
-        stdin().read_line(&mut config.cookie)?;
+        stdin().read_line(&mut cookie)?;
+        config.cookie = cookie.trim().to_string();
     }
 
     confy::store(APP_NAME, CONFIG_NAME, &config)?;
@@ -79,7 +85,7 @@ async fn send_request(
         .get(SEARCH_URL)
         .query(&[("q", query)])
         .query(&config.filters)
-        .header("Cookie", config.cookie.trim())
+        .header("Cookie", &config.cookie)
         .send()
         .await?
         .json::<Response>()
@@ -128,7 +134,7 @@ async fn download_maps(
         let url = format!("{}/{}/download", BASE_URL, map.id);
         let response = client
             .get(url)
-            .header("Cookie", config.cookie.trim())
+            .header("Cookie", &config.cookie)
             .header("Referer", format!("{}/{}", BASE_URL, map.id))
             .send()
             .await?;
@@ -140,12 +146,13 @@ async fn download_maps(
             .progress_chars("#>-"));
         progress.set_message(format!("Downloading {}", map));
 
-        let path = format!(
-            "{}/{}-{}.osz",
-            config.download_directory.trim(),
+        let path = PathBuf::from(&config.download_directory)
+            .join(PathBuf::from(format!(
+            "{}-{}.osz",
             map.id,
             map.sanitized_name()
-        );
+        )));
+
         let mut file = File::create(path)?;
         let mut downloaded: u64 = 0;
         let mut stream = response.bytes_stream();
