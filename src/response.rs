@@ -17,8 +17,7 @@ pub struct Beatmap {
 }
 
 impl Beatmap {
-    // This is needed for those running osu under wine, wine doesn't recognize some characters and
-    // will throw a IllegalCharacterInPath exception.
+    // This is needed because filenames can't have some special characters on windows
     pub fn sanitized_name(&self) -> String {
         let formatted_name = format!("{}", self);
         let mut sanitized_name = formatted_name.clone();
