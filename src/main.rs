@@ -23,7 +23,6 @@ mod response;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let mut config = load_config()?;
-    dbg!(&config.download_directory);
     let client = Client::new();
     let query = parse_args(&mut config);
     let response = send_request(&client, query.as_str(), &config).await?;
