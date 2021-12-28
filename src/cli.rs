@@ -7,7 +7,7 @@ use structopt::StructOpt;
     name = "oszdl",
     about = "A CLI beatmap downloader for the rhythm game osu!",
     author = "Shinobu#2469",
-    version = "1.0"
+    version = "1.1"
 )]
 pub struct Cli {
     #[structopt[default_value=""]]
